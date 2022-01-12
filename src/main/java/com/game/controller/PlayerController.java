@@ -1,5 +1,6 @@
 package com.game.controller;
 
+import com.game.dto.PlayerDto;
 import com.game.entity.Player;
 import com.game.entity.Profession;
 import com.game.entity.Race;
@@ -13,7 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/")
+@RestController
+@RequestMapping(value = "/rest/players")
 public class PlayerController {
 
     private final PlayerService playerService;
@@ -24,43 +26,52 @@ public class PlayerController {
     }
 
 
-    @GetMapping("/rest/players")
-    public void   getAllPlayers(Model model){
+    @GetMapping()
+    public void   getAllPlayers(Model model, @PathVariable(value = "name", required = false) String name, @PathVariable(value = "title", required = false) String title,
+                                @PathVariable("race") Race race, @PathVariable("profession") Profession profession,
+                                @PathVariable("after") Long after, @PathVariable("before") Long before, @PathVariable("banned") Boolean banned,
+                                @PathVariable("minExperience") Integer minExperience, @PathVariable("maxExperience") Integer maxExperience,
+                                @PathVariable("minLevel") Integer minLevel, @PathVariable("maxLevel") Integer maxLevel,
+                                @PathVariable("order") PlayerOrder order, @PathVariable("pageNumber") Integer pageNumber,
+                                @PathVariable("pageSize") Integer pageSize){
         List<Player> list = playerService.getAllPlayer();
-
+        for (Player player:list){
+            System.out.println(player);
+        }
         model.addAttribute("mainTable",list);
     }
 
-    @GetMapping("/rest/players/{id}")
-    public  void getPlayerById(@PathVariable(value = "id")Long id, Model model){
+    @GetMapping("/{id}")
+    public  Player getPlayerById(@PathVariable(value = "id")Long id){
         Player player = playerService.getPlayerById(id);
-        model.addAttribute("player", player);
+        return player;
     }
-    @PostMapping("/rest/players/{id}")
-    public void updatePlayer(@RequestParam(value = "name", required = false) String name, @RequestParam(value = "title", required = false) String title,
-                             @RequestParam(value = "race", required = false) Race race, @RequestParam(value = "profession", required = false) Profession profession,
-                             @RequestParam(value = "experience", required = false) Integer experience, @RequestParam(value = "birthday", required = false) Long date,
-                             @RequestParam(value = "banned", defaultValue = "false") Boolean banned, @PathVariable("id") Long userId){
-        playerService.update(userId, name, title, race, profession, experience, date, banned);
+    @PostMapping("/{id}")
+    public Player updatePlayer(@PathVariable(value = "id")Long id, @RequestBody Player playerDto){
+        return playerService.update(playerDto, id);
     }
 
 
-   @PostMapping("/rest/players")
-    public void createPlayer( @RequestParam(value = "name", required = false) String name, @RequestParam(value = "title" , required = false) String title,
-                              @RequestParam(value = "race", required = false) Race race, @RequestParam(value = "profession", required = false) Profession profession,
-                              @RequestParam(value = "experience", required = false) Integer experience, @RequestParam(value = "birthday", required = false) Long date,
-                              @RequestParam(value = "banned", defaultValue = "false") Boolean banned){
-
-        playerService.create(name, title, race, profession, experience, date, banned);
+   @PostMapping()
+    public Player createPlayer(@RequestBody Player playerDto){
+        Player player = playerService.create(playerDto.getName(), playerDto.getTitle(), playerDto.getRace(),
+                playerDto.getProfession(), playerDto.getExperience(), playerDto.getBirthday(), playerDto.getBanned());
+       System.out.println(playerDto);
+       System.out.println(player);
+        return player;
     }
 
-    @GetMapping("/rest/players/count")
-    public void getPlayer(Model model){
+    @GetMapping("/count")
+    public void getPlayer(Model model, @PathVariable("name") String name, @PathVariable("title") String title,
+                          @PathVariable("race") Race race, @PathVariable("profession") Profession profession,
+                          @PathVariable("after") Long after, @PathVariable("before") Long before, @PathVariable("banned") Boolean banned,
+                          @PathVariable("minExperience") Integer minExperience, @PathVariable("maxExperience") Integer maxExperience,
+                          @PathVariable("minLevel") Integer minLevel, @PathVariable("maxLevel") Integer maxLevel){
         Integer count = playerService.getAllPlayer().size();
         model.addAttribute("count", count);
     }
 
-    @DeleteMapping ("/rest/players/{id}")
+    @DeleteMapping ("/{id}")
     public void deletePlayer(@PathVariable("id")Long id){
         playerService.deletePlayer(id);
     }

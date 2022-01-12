@@ -12,11 +12,9 @@ public interface PlayerService {
 
     Player getPlayerById(Long id);
 
-    //void update(Long userId, String name, String title, Race race, Profession profession, Integer experience);
-
-    void update(Long userId, String name, String title, Race race, Profession profession, Integer experience, Long date, Boolean banned);
-
-    void create(String name, String title, Race race, Profession profession, Integer experience, Long date, Boolean banned);
+    Player create(String name, String title, Race race, Profession profession, Integer experience, Date date, Boolean banned);
 
     void deletePlayer(Long id);
+
+    Player update(Player playerDto, Long id);
 }
