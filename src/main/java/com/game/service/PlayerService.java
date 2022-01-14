@@ -1,20 +1,22 @@
 package com.game.service;
 
 import com.game.entity.Player;
-import com.game.entity.Profession;
-import com.game.entity.Race;
 
-import java.util.Date;
+import java.awt.print.Pageable;
 import java.util.List;
+import java.util.Map;
 
 public interface PlayerService {
-    List<Player> getAllPlayer();
+
+    List<Player> getAllPlayer(Map<String, String> params, Pageable pages);
 
     Player getPlayerById(Long id);
-
-    Player create(String name, String title, Race race, Profession profession, Integer experience, Date date, Boolean banned);
 
     void deletePlayer(Long id);
 
     Player update(Player playerDto, Long id);
+
+    Player create(Player playerDto);
+
+    Integer getCountPlayers(Map<String, String> params);
 }

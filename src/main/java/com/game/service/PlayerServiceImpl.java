@@ -6,26 +6,35 @@ import com.game.entity.Race;
 import com.game.exception.IdInValidException;
 import com.game.exception.PlayerNotFountException;
 import com.game.repository.PlayerRepository;
+import com.game.specification.PlayerSpecification;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-
+import java.awt.print.Pageable;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+;
 @Component
 @Service
 public class PlayerServiceImpl implements PlayerService {
 
     private final PlayerRepository playerRepository;
+    private final PlayerSpecification playerSpecification;
 
-    public PlayerServiceImpl(PlayerRepository playerRepository) {
+    public PlayerServiceImpl(PlayerRepository playerRepository, PlayerSpecification playerSpecification) {
         this.playerRepository = playerRepository;
+        this.playerSpecification = playerSpecification;
     }
 
-    @Override
-    public List<Player> getAllPlayer() {
-        return playerRepository.findAll();
+
+    public List<Player> getAllPlayer(Map<String, String> params, Pageable pageable) {
+        Specification<Player> specification = playerSpecification.getSpecification(params);
+
+        return null;//playerRepository.findAll(specification, pageable);
     }
+
 
     @Override
     public Player getPlayerById(Long id) {
@@ -36,15 +45,22 @@ public class PlayerServiceImpl implements PlayerService {
 
 
     @Override
-    public Player create(String name, String title, Race race, Profession profession, Integer experience, Date date, Boolean banned) {
+    public Player create(Player playerDto) {
+        String name = playerDto.getName();
+        String title = playerDto.getTitle();
+        Race race = playerDto.getRace();
+        Profession profession = playerDto.getProfession();
+        Date date = playerDto.getBirthday();
+        Integer experience = playerDto.getExperience();
+        Boolean banned = playerDto.getBanned();
 
         if (name == null || title == null || race == null || profession == null || date == null || experience == null ||
-                date.getTime() < 946155600000L || date.getTime() >= 32503669200000L ||  experience > 10000000 || experience < 0
+                date.getTime() < 0 || experience > 10000000 || experience < 0
                 || title.length()>30 || name.length()>30) {
             throw new IdInValidException();
         } else {
         Player player = new Player();
-        int level = (int) (Math.sqrt(2500 + 200 * experience) - 50) / 100;
+        int level = (int) (Math.sqrt(200 * experience + 2500) - 50) / 100;
         player.setName(name);
         player.setTitle(title);
         player.setRace(race);
@@ -53,11 +69,16 @@ public class PlayerServiceImpl implements PlayerService {
         player.setLevel(level);
         player.setBanned(banned);
         player.setExperience(experience);
-        player.setUntilNextLevel(Math.abs(50 * (level + 1) + (level + 2) - experience));
-        playerRepository.save(player);
-        return getPlayerById(player.getId());
+        player.setUntilNextLevel(50 * (level + 1) * (level + 2) - experience);
+
+        return playerRepository.save(player);
         }
 
+    }
+
+    @Override
+    public Integer getCountPlayers(Map<String, String> params) {
+        return null;
     }
 
     @Override
@@ -94,19 +115,20 @@ public class PlayerServiceImpl implements PlayerService {
             if (playerDto.getProfession() != null) {
                 player.setProfession(playerDto.getProfession());
             }
+            int exp = player.getExperience();
             if (playerDto.getExperience() != null) {
                 if ( playerDto.getExperience() > 10000000 || playerDto.getExperience() < 0){
                     throw new IdInValidException();
                 } else {
-                    int exp = playerDto.getExperience();
+                    exp = playerDto.getExperience();
+
                     player.setExperience(exp);
-                    int level = (int) (Math.sqrt(2500 + 200 * exp) - 50) / 100;
-                    if(playerDto.getLevel()!= null){
-                        player.setLevel(playerDto.getLevel());
-                    } else {
-                    player.setLevel(level);}
-                    player.setUntilNextLevel(Math.abs(50 * (level + 1) + (level + 2) - exp));
+
                 }
+            int level = (int) (Math.sqrt(200 * exp + 2500) - 50) / 100;
+
+            player.setLevel(level);
+            player.setUntilNextLevel(50 * (level + 1) * (level + 2) - exp);
             }
 
             if (playerDto.getBanned() != null) {
@@ -122,9 +144,7 @@ public class PlayerServiceImpl implements PlayerService {
 
 
 
-            return playerRepository.save(player);
-        }
-
-
+        return playerRepository.save(player);
+    }
 
 }

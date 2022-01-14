@@ -1,17 +1,21 @@
 package com.game.controller;
 
-import com.game.dto.PlayerDto;
 import com.game.entity.Player;
-import com.game.entity.Profession;
-import com.game.entity.Race;
+
 import com.game.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+
 import org.springframework.web.bind.annotation.*;
 
 
+import java.awt.print.Pageable;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RestController
@@ -27,18 +31,13 @@ public class PlayerController {
 
 
     @GetMapping()
-    public void   getAllPlayers(Model model, @PathVariable(value = "name", required = false) String name, @PathVariable(value = "title", required = false) String title,
-                                @PathVariable("race") Race race, @PathVariable("profession") Profession profession,
-                                @PathVariable("after") Long after, @PathVariable("before") Long before, @PathVariable("banned") Boolean banned,
-                                @PathVariable("minExperience") Integer minExperience, @PathVariable("maxExperience") Integer maxExperience,
-                                @PathVariable("minLevel") Integer minLevel, @PathVariable("maxLevel") Integer maxLevel,
-                                @PathVariable("order") PlayerOrder order, @PathVariable("pageNumber") Integer pageNumber,
-                                @PathVariable("pageSize") Integer pageSize){
-        List<Player> list = playerService.getAllPlayer();
-        for (Player player:list){
-            System.out.println(player);
-        }
-        model.addAttribute("mainTable",list);
+    public List<Player>  getAllPlayers(@RequestParam Map<String, String> params,
+                                       @RequestParam(required = false, defaultValue = "ID") PlayerOrder order,
+                                       @RequestParam(required = false, defaultValue = "0") Integer pageNumber,
+                                       @RequestParam(required = false, defaultValue = "3") Integer pageSize){
+        Pageable pages = (Pageable) PageRequest.of(pageNumber, pageSize, Sort.by(order.getFieldName()));
+        List<Player> list = playerService.getAllPlayer(params, pages);
+        return list.stream().collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
@@ -54,22 +53,15 @@ public class PlayerController {
 
    @PostMapping()
     public Player createPlayer(@RequestBody Player playerDto){
-        Player player = playerService.create(playerDto.getName(), playerDto.getTitle(), playerDto.getRace(),
-                playerDto.getProfession(), playerDto.getExperience(), playerDto.getBirthday(), playerDto.getBanned());
-       System.out.println(playerDto);
-       System.out.println(player);
+        Player player = playerService.create(playerDto);
         return player;
     }
 
-    @GetMapping("/count")
-    public void getPlayer(Model model, @PathVariable("name") String name, @PathVariable("title") String title,
-                          @PathVariable("race") Race race, @PathVariable("profession") Profession profession,
-                          @PathVariable("after") Long after, @PathVariable("before") Long before, @PathVariable("banned") Boolean banned,
-                          @PathVariable("minExperience") Integer minExperience, @PathVariable("maxExperience") Integer maxExperience,
-                          @PathVariable("minLevel") Integer minLevel, @PathVariable("maxLevel") Integer maxLevel){
-        Integer count = playerService.getAllPlayer().size();
-        model.addAttribute("count", count);
-    }
+  /*  @GetMapping("/count")
+    public Integer getPlayer(@RequestParam Map<String, String> params){
+        Integer count = playerService.getCountPlayers(params);
+        return count;
+    }*/
 
     @DeleteMapping ("/{id}")
     public void deletePlayer(@PathVariable("id")Long id){
