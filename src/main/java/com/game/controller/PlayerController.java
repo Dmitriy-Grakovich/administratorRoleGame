@@ -1,21 +1,17 @@
 package com.game.controller;
 
 import com.game.entity.Player;
-
 import com.game.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
-
 import org.springframework.web.bind.annotation.*;
-
-
-import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 
 @Controller
 @RestController
@@ -35,7 +31,7 @@ public class PlayerController {
                                        @RequestParam(required = false, defaultValue = "ID") PlayerOrder order,
                                        @RequestParam(required = false, defaultValue = "0") Integer pageNumber,
                                        @RequestParam(required = false, defaultValue = "3") Integer pageSize){
-        Pageable pages = (Pageable) PageRequest.of(pageNumber, pageSize, Sort.by(order.getFieldName()));
+        Pageable pages = PageRequest.of(pageNumber, pageSize, Sort.by(order.getFieldName()));
         List<Player> list = playerService.getAllPlayer(params, pages);
         return list.stream().collect(Collectors.toList());
     }
@@ -57,11 +53,11 @@ public class PlayerController {
         return player;
     }
 
-  /*  @GetMapping("/count")
+    @GetMapping("/count")
     public Integer getPlayer(@RequestParam Map<String, String> params){
         Integer count = playerService.getCountPlayers(params);
         return count;
-    }*/
+    }
 
     @DeleteMapping ("/{id}")
     public void deletePlayer(@PathVariable("id")Long id){

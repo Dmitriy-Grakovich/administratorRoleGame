@@ -12,7 +12,4 @@ import java.util.List;
 
 public interface PlayerRepository extends JpaRepository<Player, Long>, JpaSpecificationExecutor<Player>  {
 
-   void deleteById(Long id);
-
- //  List<Player> findAll(Specification<Player> specification, Pageable pages);
 }

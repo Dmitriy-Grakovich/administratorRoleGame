@@ -7,10 +7,10 @@ import com.game.exception.IdInValidException;
 import com.game.exception.PlayerNotFountException;
 import com.game.repository.PlayerRepository;
 import com.game.specification.PlayerSpecification;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import java.awt.print.Pageable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -28,11 +28,11 @@ public class PlayerServiceImpl implements PlayerService {
         this.playerSpecification = playerSpecification;
     }
 
-
+    @Override
     public List<Player> getAllPlayer(Map<String, String> params, Pageable pageable) {
         Specification<Player> specification = playerSpecification.getSpecification(params);
 
-        return null;//playerRepository.findAll(specification, pageable);
+        return playerRepository.findAll(specification, pageable).getContent();
     }
 
 
@@ -78,7 +78,9 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public Integer getCountPlayers(Map<String, String> params) {
-        return null;
+        Specification<Player> example = playerSpecification.getSpecification(params);
+
+        return (int) playerRepository.count(example);
     }
 
     @Override
