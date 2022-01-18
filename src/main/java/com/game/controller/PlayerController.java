@@ -33,7 +33,7 @@ public class PlayerController {
                                        @RequestParam(required = false, defaultValue = "3") Integer pageSize){
         Pageable pages = PageRequest.of(pageNumber, pageSize, Sort.by(order.getFieldName()));
         List<Player> list = playerService.getAllPlayer(params, pages);
-        return list.stream().collect(Collectors.toList());
+        return list;
     }
 
     @GetMapping("/{id}")

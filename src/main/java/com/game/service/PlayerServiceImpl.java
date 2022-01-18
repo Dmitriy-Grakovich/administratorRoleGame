@@ -143,9 +143,6 @@ public class PlayerServiceImpl implements PlayerService {
                     player.setBirthday(playerDto.getBirthday());
                 }
             }
-
-
-
         return playerRepository.save(player);
     }
 
